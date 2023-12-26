@@ -13,9 +13,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_DESTROY:
 		{
 			OWindow* window = (OWindow*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-			window->onDestroy();
 			break;
 		}
+
+		case WM_CLOSE:
+		{
+			PostQuitMessage(0);
+			break;
+		}
+
 		default: 
 			return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
@@ -33,8 +39,11 @@ OWindow::OWindow()
 	// 
 	wc.lpfnWndProc = &WndProc;
 
-	// To let know OS about the class we have to reduce the rate
-	assert(RegisterClassEx(&wc));
+	/*	To let know OS about the class we have to reduce the rate
+		assert is used by developer to check possible internal. 
+		Errors done by the user*/
+	auto classID = RegisterClassEx(&wc);
+	assert(classID);
 
 	//To get the real window size
 	RECT rc = { 0, 0, 1024, 768};
@@ -58,14 +67,4 @@ OWindow::OWindow()
 OWindow::~OWindow()
 {
 	DestroyWindow((HWND)m_handle);
-}
-
-void OWindow::onDestroy()
-{
-	m_handle = nullptr;
-}
-
-bool OWindow::isClosed()
-{
-	return !m_handle;
 }
